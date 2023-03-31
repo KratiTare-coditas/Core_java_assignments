@@ -19,27 +19,33 @@ public class Admin extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        resp.setContentType("text/html");
         PrintWriter out=resp.getWriter();
         ServletContext context= req.getServletContext();
         HttpSession session= req.getSession();
         try {
             Class.forName(context.getInitParameter("driver"));
             con= DriverManager.getConnection(context.getInitParameter("url"),context.getInitParameter("username"),context.getInitParameter("password"));
-            ps=con.prepareStatement("select * from login where role='admin'");
+            ps=con.prepareStatement("select * from registration");
             rs=ps.executeQuery();
             while(rs.next())
             {
                // if(rs.getString(3)=="admin")
-                {
+
+                    String firstname=req.getParameter("firstname");
                     String username=req.getParameter("username");
                     String password=req.getParameter("password");
+                    String city=req.getParameter("city");
                     String role=req.getParameter("role");
-                    out.println("Username::"+rs.getString(1));
-                    out.println("Role::"+rs.getString(3));
+                    out.println("Firstname:"+rs.getString(1));
+                    out.println("Username::"+rs.getString(2));
+                    out.println("City::"+rs.getString(4));
 
-                }
+
+
             }
+            out.println("<a href='Delete'>Delete</a>");
+            out.println("<a href='Edit'>Edit</a>");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {

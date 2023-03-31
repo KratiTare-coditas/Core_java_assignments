@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.cert.CertSelector;
 import java.sql.*;
 
 @WebServlet("/Login")
@@ -25,45 +26,42 @@ public class Login extends HttpServlet {
         String password=req.getParameter("password");
         try {
             Class.forName(context.getInitParameter("driver"));
-            con= DriverManager.getConnection(context.getInitParameter("url"),context.getInitParameter("username"),context.getInitParameter("password"));
+            con = DriverManager.getConnection(context.getInitParameter("url"), context.getInitParameter("username"), context.getInitParameter("password"));
 
 
-            ps=con.prepareStatement("select * from registration");
-            rs=ps.executeQuery();
-String name=" ";
+            ps = con.prepareStatement("select * from registration");
+            rs = ps.executeQuery();
+            String name = " ";
 
-        while(rs.next()){
-            String uname=rs.getString(2);
-            String pwd=rs.getString(3);
-        if(username.equals(uname)&&password.equals(pwd)) {
-            out.println("welcome" + uname);
-            name=rs.getString(1);
-            count++;
-            ps=con.prepareStatement("insert into login(username,password)values(?,?)");
-            ps.setString(1,uname);
-            ps.setString(2,pwd);
-            ps.executeUpdate();
+            while (rs.next()) {
+                String uname = rs.getString(2);
+                String pwd = rs.getString(3);
+                if (username.equals(uname) && password.equals(pwd)) {
+                    out.println("welcome" + uname);
+                    name = rs.getString(1);
+                    count++;
+                    ps = con.prepareStatement("insert into login(username,password)values(?,?)");
+                    ps.setString(1, uname);
+                    ps.setString(2, pwd);
+                    ps.executeUpdate();
 
+                }
+                if (count == 1) {
+                    session.setAttribute("username", name);
+                    //resp.sendRedirect("Welcome");
+                    RequestDispatcher rd = req.getRequestDispatcher("Welcome");
+                    rd.forward(req,resp);
+                } else {
+
+                    out.println("Sorry invalid entry");
+                    RequestDispatcher requestDispatcher = req.getRequestDispatcher("login.html");
+                    requestDispatcher.include(req, resp);
+
+
+                }
+            }
         }
-        if(count==1)
-        {
-            session.setAttribute("username",name);
-            resp.sendRedirect("Welcome");
-        }
-        else
-        {
-
-            out.println("Sorry invalid entry");
-            RequestDispatcher requestDispatcher= req.getRequestDispatcher("login.html");
-            requestDispatcher.include(req,resp);
-
-
-        }
-        }
-
-
-
-        } catch (ClassNotFoundException e) {
+        catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
